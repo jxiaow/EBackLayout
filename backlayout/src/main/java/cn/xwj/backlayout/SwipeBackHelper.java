@@ -47,8 +47,7 @@ public class SwipeBackHelper implements LifecycleObserver {
     /**
      * 设置滑动的触发方向
      *
-     * @param edge {@link SwipeBackLayout#EDGE_LEFT,SwipeBackLayout#EDGE_RIGHT,
-     *             SwipeBackLayout#EDGE_BOTTOM,SwipeBackLayout#EDGE_ALL }
+     * @param edge {@link SwipeBackLayout#EDGE_LEFT,SwipeBackLayout#EDGE_RIGHT,SwipeBackLayout#EDGE_BOTTOM,SwipeBackLayout#EDGE_ALL }
      */
     public void setEdgeTrackingFlags(int edge) {
         if (getSwipeBackLayout() != null) {

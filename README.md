@@ -8,11 +8,11 @@
 
 ## 使用
 
-**目前只能用于Activity!!!!***
+**目前只能用于Activity!!!!**
 
-**目前只能用于Activity!!!!***
+**目前只能用于Activity!!!!**
 
-**目前只能用于Activity!!!!***
+**目前只能用于Activity!!!!**
 
 #### Gradle:
 
