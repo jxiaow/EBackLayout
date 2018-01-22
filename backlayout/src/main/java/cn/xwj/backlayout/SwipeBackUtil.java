@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ActivityOptions;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.Fragment;
 
 import java.lang.reflect.Method;
 
@@ -99,5 +100,9 @@ public class SwipeBackUtil {
             convertToTranslucent.invoke(activity, null, options);
         } catch (Throwable t) {
         }
+    }
+
+    public static void convertFragmentToTranslucent(Fragment fragment) {
+
     }
 }

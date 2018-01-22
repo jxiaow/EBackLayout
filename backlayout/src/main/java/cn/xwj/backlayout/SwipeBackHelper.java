@@ -6,11 +6,12 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.support.v4.app.Fragment;
 import android.widget.FrameLayout;
 
 import static android.arch.lifecycle.Lifecycle.Event;
 
-public class SwipeBackHelper implements LifecycleObserver {
+public class SwipeBackHelper implements LifecycleObserver, SwipeBackLayout.SwipeListener {
     private LifecycleOwner mOwner;
     private SwipeBackLayout mSwipeBackLayout;
 
@@ -25,12 +26,24 @@ public class SwipeBackHelper implements LifecycleObserver {
     }
 
     private SwipeBackHelper(LifecycleOwner owner) {
-        if (owner == null || !(owner instanceof Activity)) {
-            throw new IllegalArgumentException("owner must be instanceof Activity");
+        if (owner == null) {
+            throw new IllegalArgumentException("owner must not is null");
         }
         this.mOwner = owner;
+        if (!isFragment()) {
+            onActivityCreate();
+        } else {
+            onFragmentCreate();
+        }
         this.mOwner.getLifecycle().addObserver(this);
-        onActivityCreate();
+    }
+
+    private void onFragmentCreate() {
+        mSwipeBackLayout = new SwipeBackLayout(getFragment().getActivity());
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT);
+        mSwipeBackLayout.setLayoutParams(layoutParams);
+        mSwipeBackLayout.addSwipeListener(this);
     }
 
     /**
@@ -56,6 +69,9 @@ public class SwipeBackHelper implements LifecycleObserver {
     }
 
     private Activity getActivity() {
+        if (this.mOwner instanceof Fragment) {
+            return getFragment().getActivity();
+        }
         return (Activity) this.mOwner;
     }
 
@@ -67,25 +83,25 @@ public class SwipeBackHelper implements LifecycleObserver {
         FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
                 FrameLayout.LayoutParams.MATCH_PARENT);
         mSwipeBackLayout.setLayoutParams(layoutParams);
-        mSwipeBackLayout.addSwipeListener(new SwipeBackLayout.SwipeListener() {
-            @Override
-            public void onScrollStateChange(int state, float scrollPercent) {
-            }
-
-            @Override
-            public void onEdgeTouch(int edgeFlag) {
-                SwipeBackUtil.convertActivityToTranslucent(getActivity());
-            }
-
-            @Override
-            public void onScrollOverThreshold() {
-            }
-        });
+        mSwipeBackLayout.addSwipeListener(this);
     }
 
     @OnLifecycleEvent(Event.ON_CREATE)
     public void onPostCreate() {
-        mSwipeBackLayout.attachToActivity(getActivity());
+        if (!isFragment()) {
+            mSwipeBackLayout.attachToActivity(getActivity());
+        }
+    }
+
+    @OnLifecycleEvent(Event.ON_START)
+    public void start() {
+        if (isFragment()) {
+            mSwipeBackLayout.attachToFragment(getFragment());
+        }
+    }
+
+    private Fragment getFragment() {
+        return (Fragment) this.mOwner;
     }
 
     public SwipeBackLayout getSwipeBackLayout() {
@@ -97,5 +113,31 @@ public class SwipeBackHelper implements LifecycleObserver {
         if (this.mOwner != null && this.mOwner.getLifecycle() != null) {
             this.mOwner.getLifecycle().removeObserver(this);
         }
+        if (mSwipeBackLayout != null) {
+            mSwipeBackLayout.removeSwipeListener(this);
+        }
+    }
+
+    private boolean isFragment() {
+        return this.mOwner instanceof Fragment;
+    }
+
+    @Override
+    public void onScrollStateChange(int state, float scrollPercent) {
+
+    }
+
+    @Override
+    public void onEdgeTouch(int edgeFlag) {
+        if (!isFragment()) {
+            SwipeBackUtil.convertActivityToTranslucent(getActivity());
+        } else {
+//            SwipeBackUtil.convertFragmentToTranslucent(getFragment());
+            getFragment().getActivity().getSupportFragmentManager().beginTransaction().remove(getFragment()).commit();
+        }
+    }
+
+    @Override
+    public void onScrollOverThreshold() {
     }
 }
